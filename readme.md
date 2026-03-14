@@ -424,6 +424,11 @@ See LICENSE file for details.
 
 ---
 
+## Contact
+optikr@outlook.de
+
+---
+
 <div align="center">
 
 **Thank you for using OptikR!**
