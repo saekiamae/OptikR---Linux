@@ -158,6 +158,9 @@ class PyQt6OverlayAdapter:
             self.config_manager.get_setting('overlay.animation_in', 'FADE'))
         animation_out = self._parse_animation_type(
             self.config_manager.get_setting('overlay.animation_out', 'FADE'))
+        visible_in_screenshots = self.config_manager.get_setting(
+            'overlay.visible_in_screenshots', False
+        )
 
         config = OverlayConfig(
             style=style,
@@ -168,7 +171,7 @@ class PyQt6OverlayAdapter:
             animation_out=animation_out,
             animation_duration=self.config_manager.get_setting('overlay.animation_duration', 300),
             auto_hide_delay=0,  # Pipeline overlays persist until replaced by next frame
-            exclude_from_capture=True,
+            exclude_from_capture=not visible_in_screenshots,
         )
 
         logger.debug("Overlay configuration loaded successfully")
