@@ -1912,23 +1912,11 @@ class StartupPipeline(QObject):
 
                 # Capture region offset for coordinate conversion
                 region_x, region_y = 0, 0
+                capture_monitor_id = None
                 if self.capture_region:
                     region_x = self.capture_region.rectangle.x
                     region_y = self.capture_region.rectangle.y
-
-                ov_region = None
-                if self.pipeline and hasattr(self.pipeline, 'config') and self.pipeline.config:
-                    ov_region = getattr(self.pipeline.config, 'overlay_region', None)
-
-                if not ov_region:
-                    # Fallback: read directly from config_manager
-                    if self.config_manager:
-                        ov_region = self.config_manager.get_setting('overlay.region', None)
-                    self.logger.debug(
-                        "overlay_region from pipeline.config was %s, fallback=%s",
-                        getattr(self.pipeline.config, 'overlay_region', 'N/A') if self.pipeline and hasattr(self.pipeline, 'config') and self.pipeline.config else 'no pipeline',
-                        ov_region,
-                    )
+                    capture_monitor_id = self.capture_region.monitor_id
 
                 # --- Phase 1: compute absolute screen positions ---------------
                 text_blocks = (
@@ -1997,49 +1985,37 @@ class StartupPipeline(QObject):
                         i, pos_source, ocr_x, ocr_y, pos_w, pos_h,
                     )
 
-                    abs_x = region_x + ocr_x
-                    abs_y = region_y + ocr_y
+                    # Scale OCR coords from frame pixel space to the
+                    # capture region's logical screen space.  The captured
+                    # frame may differ in resolution from the logical region
+                    # (e.g. due to DPI scaling), so we normalise by the
+                    # reference frame size and map into the capture region.
+                    if self._ocr_ref_size is not None:
+                        ref_w, ref_h = self._ocr_ref_size
+                    elif ocr_frame_w > 0 and ocr_frame_h > 0:
+                        ref_w, ref_h = ocr_frame_w, ocr_frame_h
+                    else:
+                        ref_w, ref_h = 0, 0
 
-                    self.logger.debug(
-                        "Translation[%d] pre_scaling_abs=(%d,%d) region_offset=(%d,%d)",
-                        i, abs_x, abs_y, region_x, region_y,
-                    )
+                    cap_w = self.capture_region.rectangle.width if self.capture_region else 0
+                    cap_h = self.capture_region.rectangle.height if self.capture_region else 0
 
-                    if ov_region and ov_region.get('width', 0) > 0 and ov_region.get('height', 0) > 0:
-                        ov_x = ov_region.get('x', 0)
-                        ov_y = ov_region.get('y', 0)
-                        ov_w = ov_region['width']
-                        ov_h = ov_region['height']
+                    if ref_w > 0 and ref_h > 0 and cap_w > 0 and cap_h > 0:
+                        abs_x = int(region_x + (ocr_x / ref_w) * cap_w)
+                        abs_y = int(region_y + (ocr_y / ref_h) * cap_h)
+                    else:
+                        abs_x = region_x + ocr_x
+                        abs_y = region_y + ocr_y
 
-                        # Use the locked OCR reference dimensions for
-                        # consistent scaling.  Fall back to capture region
-                        # size only when no reference is available.
-                        if self._ocr_ref_size is not None:
-                            ref_w, ref_h = self._ocr_ref_size
-                        elif ocr_frame_w > 0 and ocr_frame_h > 0:
-                            ref_w = ocr_frame_w
-                            ref_h = ocr_frame_h
-                        else:
-                            ref_w = self.capture_region.rectangle.width if self.capture_region else ov_w
-                            ref_h = self.capture_region.rectangle.height if self.capture_region else ov_h
-
-                        self.logger.debug(
-                            "Translation[%d] overlay_region_scale ov=(%d,%d,%d,%d) ref=(%d,%d)",
-                            i, ov_x, ov_y, ov_w, ov_h, ref_w, ref_h,
-                        )
-
-                        if ref_w > 0 and ref_h > 0:
-                            abs_x = int(ov_x + (ocr_x / ref_w) * ov_w)
-                            abs_y = int(ov_y + (ocr_y / ref_h) * ov_h)
-
+                    if cap_w > 0 and cap_h > 0:
                         clamp_w = max(pos_w, 50)
                         clamp_h = max(pos_h, 30)
-                        abs_x = max(ov_x, min(abs_x, ov_x + ov_w - clamp_w))
-                        abs_y = max(ov_y, min(abs_y, ov_y + ov_h - clamp_h))
+                        abs_x = max(region_x, min(abs_x, region_x + cap_w - clamp_w))
+                        abs_y = max(region_y, min(abs_y, region_y + cap_h - clamp_h))
 
                     self.logger.debug(
-                        "Translation[%d] post_scaling_abs=(%d,%d)",
-                        i, abs_x, abs_y,
+                        "Translation[%d] screen_pos=(%d,%d) region=(%d,%d,%dx%d) ref=%dx%d",
+                        i, abs_x, abs_y, region_x, region_y, cap_w, cap_h, ref_w, ref_h,
                     )
 
                     text = translation.translated_text if hasattr(translation, 'translated_text') else str(translation)
@@ -2049,8 +2025,13 @@ class StartupPipeline(QObject):
                 if (positioning_mode == 'intelligent'
                         and self._positioning_engine
                         and len(positioned) > 1):
+                    cap_bounds = None
+                    if self.capture_region:
+                        r = self.capture_region.rectangle
+                        cap_bounds = {'x': r.x, 'y': r.y,
+                                      'width': r.width, 'height': r.height}
                     positioned = self._apply_intelligent_positions(
-                        positioned, ov_region, text_blocks,
+                        positioned, cap_bounds, text_blocks,
                     )
 
                 # --- Phase 3: show overlays with stable IDs -------------------
@@ -2084,7 +2065,8 @@ class StartupPipeline(QObject):
                         text[:50], x, y, overlay_id,
                     )
                     self.overlay_system.show_translation(
-                        text, (x, y), translation_id=overlay_id, monitor_id=None)
+                        text, (x, y), translation_id=overlay_id,
+                        monitor_id=capture_monitor_id)
 
                 # --- Phase 4: manage stale overlays ---------------------------
                 if auto_hide_on_disappear:
