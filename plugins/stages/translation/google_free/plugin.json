@@ -1,0 +1,17 @@
+{
+  "name": "google_free",
+  "display_name": "Google Translate (Free)",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Free translation using the deep-translator library — no API key required",
+  "type": "translation",
+  "enabled_by_default": true,
+  "settings": {},
+  "dependencies": ["deep-translator>=1.11.0"],
+  "runtime_requirements": {
+    "internet": {
+      "required": true,
+      "note": "Requires internet connection to access Google Translate"
+    }
+  }
+}

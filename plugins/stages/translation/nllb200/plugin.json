@@ -1,0 +1,27 @@
+{
+  "name": "nllb200",
+  "display_name": "NLLB-200 (Multilingual)",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Auto-Generator",
+  "description": "Translation plugin for NLLB-200 — Meta AI multilingual model (200+ languages)",
+  "type": "translation",
+  "enabled_by_default": true,
+  "worker_script": "worker.py",
+  "settings": {
+    "model_name": {
+      "type": "string",
+      "default": "facebook/nllb-200-1.3B",
+      "description": "HuggingFace model name"
+    },
+    "max_length": {
+      "type": "int",
+      "default": 512,
+      "description": "Maximum sequence length"
+    }
+  },
+  "dependencies": [
+    "transformers",
+    "torch",
+    "sentencepiece"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "qwen3",
+  "display_name": "Qwen3 (LLM Translation)",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Auto-Generator",
+  "description": "Translation plugin using Qwen3 causal LM with prompt-based translation",
+  "type": "translation",
+  "enabled_by_default": false,
+  "worker_script": "worker.py",
+  "settings": {
+    "model_name": {
+      "type": "string",
+      "default": "Qwen/Qwen3-1.7B",
+      "description": "HuggingFace model name for Qwen3 variant"
+    },
+    "max_length": {
+      "type": "int",
+      "default": 512,
+      "description": "Maximum output token length"
+    },
+    "temperature": {
+      "type": "float",
+      "default": 0.3,
+      "description": "Sampling temperature (lower = more deterministic)"
+    },
+    "quantization": {
+      "type": "string",
+      "default": "none",
+      "description": "Quantization mode: none, 4bit, or 8bit (requires bitsandbytes)"
+    }
+  },
+  "dependencies": [
+    "transformers",
+    "torch",
+    "accelerate"
+  ]
+}

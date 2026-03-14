@@ -1,0 +1,29 @@
+# NLLB-200 EN→DE
+
+Translation plugin for NLLB-200 (en→de)
+
+## Plugin Information
+
+- **Type**: translation
+- **Name**: nllb200_en_de
+- **Auto-generated**: Yes
+
+## Installation
+
+This plugin is auto-generated and should work out of the box.
+
+## Configuration
+
+Edit `plugin.json` to configure plugin settings.
+
+## Development
+
+To customize this plugin:
+1. Edit the script file (worker.py)
+2. Implement the TODO sections
+3. Test your changes
+4. Update this README
+
+## Support
+
+For help, see: docs/PLUGIN_DEVELOPMENT.md

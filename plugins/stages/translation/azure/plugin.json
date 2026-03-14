@@ -1,0 +1,35 @@
+{
+  "name": "azure",
+  "display_name": "Azure Translator",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Premium translation using Microsoft Azure Cognitive Services Translator API v3.0",
+  "type": "translation",
+  "enabled_by_default": false,
+  "settings": {
+    "api_key": {
+      "type": "string",
+      "default": "",
+      "description": "Azure Translator API key",
+      "sensitive": true
+    },
+    "region": {
+      "type": "string",
+      "default": "global",
+      "description": "Azure region"
+    },
+    "endpoint": {
+      "type": "string",
+      "default": "https://api.cognitive.microsofttranslator.com",
+      "description": "Azure Translator endpoint URL"
+    }
+  },
+  "dependencies": ["requests"],
+  "api_key_required": true,
+  "runtime_requirements": {
+    "internet": {
+      "required": true,
+      "note": "Requires internet connection to access Azure Translator API"
+    }
+  }
+}

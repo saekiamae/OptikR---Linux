@@ -1,0 +1,66 @@
+{
+  "name": "rapidocr",
+  "display_name": "RapidOCR",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Lightweight OCR using RapidOCR (PaddleOCR via ONNX Runtime) - CPU-optimized, no GPU required",
+  "type": "ocr",
+  "engine_type": "rapidocr",
+  "entry_point": "__init__.py",
+  "worker_script": "worker.py",
+  "enabled_by_default": false,
+  "essential": false,
+  "settings": {
+    "language": {
+      "type": "string",
+      "default": "en",
+      "description": "OCR language code (en, ja, ko, zh, etc.)",
+      "options": ["en", "ja", "ko", "zh_sim", "zh_tra", "de", "fr", "es", "ru"]
+    },
+    "min_confidence": {
+      "type": "float",
+      "default": 0.5,
+      "description": "Minimum confidence threshold for text detection",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "use_det": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable text detection (disable for pre-cropped text regions)"
+    },
+    "use_cls": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable text direction classification"
+    },
+    "use_rec": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable text recognition"
+    }
+  },
+  "dependencies": [
+    "rapidocr-onnxruntime",
+    "opencv-python",
+    "numpy"
+  ],
+  "runtime_requirements": {
+    "gpu": {
+      "required": false,
+      "recommended": false,
+      "libraries": ["rapidocr-onnxruntime"]
+    },
+    "cpu": {
+      "supported": true,
+      "performance_note": "Designed for fast CPU inference via ONNX Runtime",
+      "libraries": ["rapidocr-onnxruntime"]
+    }
+  },
+  "exe_compatibility": {
+    "cpu_build": true,
+    "gpu_build": true,
+    "auto_disable_on_cpu": false
+  },
+  "supported_languages": ["en", "ja", "ko", "zh", "de", "fr", "es", "ru", "ar", "it", "pt", "nl", "tr", "pl", "vi"]
+}

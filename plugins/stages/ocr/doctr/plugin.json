@@ -1,0 +1,68 @@
+{
+  "name": "doctr",
+  "display_name": "DocTR",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Transformer-based OCR using DocTR (Mindee) - GPU accelerated with CPU fallback, confidence scores",
+  "type": "ocr",
+  "engine_type": "doctr",
+  "entry_point": "__init__.py",
+  "worker_script": "worker.py",
+  "enabled_by_default": false,
+  "essential": false,
+  "settings": {
+    "language": {
+      "type": "string",
+      "default": "en",
+      "description": "OCR language code (en, fr, de, es, pt, etc.)",
+      "options": ["en", "fr", "de", "es", "pt", "it", "nl", "pl", "ru", "ar", "zh", "ja", "ko", "vi", "hi", "cs", "ro", "hu", "sv", "da"]
+    },
+    "gpu": {
+      "type": "bool",
+      "default": true,
+      "description": "Use GPU acceleration if available"
+    },
+    "min_confidence": {
+      "type": "float",
+      "default": 0.5,
+      "description": "Minimum confidence threshold for text detection",
+      "min": 0.0,
+      "max": 1.0
+    },
+    "det_arch": {
+      "type": "string",
+      "default": "db_resnet50",
+      "description": "Detection model architecture",
+      "options": ["db_resnet50", "db_mobilenet_v3_large", "linknet_resnet18"]
+    },
+    "reco_arch": {
+      "type": "string",
+      "default": "crnn_vgg16_bn",
+      "description": "Recognition model architecture",
+      "options": ["crnn_vgg16_bn", "crnn_mobilenet_v3_small", "vitstr_small", "parseq"]
+    }
+  },
+  "dependencies": [
+    "python-doctr[torch]",
+    "opencv-python",
+    "numpy"
+  ],
+  "runtime_requirements": {
+    "gpu": {
+      "required": false,
+      "recommended": true,
+      "libraries": ["python-doctr[torch]", "torch+cu121"]
+    },
+    "cpu": {
+      "supported": true,
+      "performance_note": "Slower on CPU, GPU recommended for real-time use",
+      "libraries": ["python-doctr[torch]", "torch-cpu"]
+    }
+  },
+  "exe_compatibility": {
+    "cpu_build": true,
+    "gpu_build": true,
+    "auto_disable_on_cpu": false
+  },
+  "supported_languages": ["en", "fr", "de", "es", "pt", "it", "nl", "pl", "ru", "ar", "zh", "ja", "ko", "vi", "hi", "cs", "ro", "hu", "sv", "da"]
+}

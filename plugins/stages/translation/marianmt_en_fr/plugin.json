@@ -1,0 +1,38 @@
+{
+  "name": "marianmt_en_fr",
+  "display_name": "MarianMT EN→FR",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Auto-Generator",
+  "description": "Translation plugin for MarianMT (en→fr)",
+  "type": "translation",
+  "enabled_by_default": true,
+  "hidden": true,
+  "worker_script": "worker.py",
+  "settings": {
+    "model_name": {
+      "type": "string",
+      "default": "Helsinki-NLP/opus-mt-en-fr",
+      "description": "HuggingFace model name"
+    },
+    "source_language": {
+      "type": "string",
+      "default": "en",
+      "description": "Source language code"
+    },
+    "target_language": {
+      "type": "string",
+      "default": "fr",
+      "description": "Target language code"
+    },
+    "max_length": {
+      "type": "int",
+      "default": 512,
+      "description": "Maximum sequence length"
+    }
+  },
+  "dependencies": [
+    "transformers",
+    "torch",
+    "sentencepiece"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "mokuro",
+  "display_name": "Mokuro",
+  "version": "pre-realese-1.0.0",
+  "author": "Auto-generated",
+  "description": "Manga page OCR with text detection and bounding boxes using Mokuro",
+  "type": "ocr",
+  "engine_type": "mokuro",
+  "entry_point": "__init__.py",
+  "worker_script": "worker.py",
+  "enabled_by_default": true,
+  "settings": {},
+  "dependencies": [
+    "mokuro",
+    "manga_ocr",
+    "torch"
+  ],
+  "supported_languages": ["ja"]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "tesseract",
+  "display_name": "Tesseract",
+  "version": "2.0.0",
+  "author": "OptikR",
+  "description": "OCR engine using tesserocr (C++ bindings) with pytesseract subprocess fallback",
+  "type": "ocr",
+  "engine_type": "tesseract",
+  "entry_point": "__init__.py",
+  "worker_script": "worker.py",
+  "enabled_by_default": true,
+  "settings": {
+    "tessdata_path": {
+      "type": "string",
+      "default": "",
+      "description": "Path to tessdata directory (e.g. tessdata_fast). Leave empty for system default."
+    },
+    "oem_mode": {
+      "type": "integer",
+      "default": 1,
+      "description": "OCR Engine Mode: 0=Legacy, 1=LSTM only (fastest), 2=Legacy+LSTM, 3=Default",
+      "enum": [0, 1, 2, 3]
+    }
+  },
+  "dependencies": [
+    "pytesseract"
+  ],
+  "optional_dependencies": [
+    "tesserocr"
+  ],
+  "supported_languages": ["en", "ja", "ko", "zh", "de", "fr", "es", "ru", "ar", "it", "pt", "nl", "tr", "pl", "hi", "th", "vi", "id", "sv", "da", "fi", "cs", "el", "he", "hu"]
+}

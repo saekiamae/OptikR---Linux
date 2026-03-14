@@ -1,0 +1,51 @@
+{
+    "name": "judge_ocr",
+    "display_name": "Judge OCR (Multi-Engine Voting)",
+    "version": "pre-realese-1.0.0",
+    "author": "OptikR Team",
+    "description": "Meta-engine that runs multiple OCR engines on the same frame and uses voting strategies to pick the best text per region",
+    "type": "ocr",
+    "engine_type": "judge_ocr",
+    "entry_point": "__init__.py",
+    "enabled_by_default": false,
+    "essential": false,
+    "settings": {
+        "engines": {
+            "type": "list",
+            "default": [],
+            "description": "List of sub-engine plugin names to load (e.g. [\"easyocr\", \"paddleocr\", \"rapidocr\"])"
+        },
+        "engine_thresholds": {
+            "type": "dict",
+            "default": {},
+            "description": "Per-engine confidence thresholds (e.g. {\"easyocr\": 0.4, \"paddleocr\": 0.5})"
+        },
+        "voting_strategy": {
+            "type": "string",
+            "default": "majority_vote",
+            "description": "Strategy used to pick the winning text per region",
+            "options": ["majority_vote", "weighted_confidence", "quorum", "best_confidence"]
+        },
+        "quorum_count": {
+            "type": "int",
+            "default": 2,
+            "description": "Minimum number of engines that must detect text in a region (used by quorum strategy)",
+            "min": 1,
+            "max": 10
+        },
+        "parallel_execution": {
+            "type": "bool",
+            "default": true,
+            "description": "Run all sub-engines in parallel using threads"
+        }
+    },
+    "dependencies": [
+        "numpy"
+    ],
+    "performance": {
+        "speed": "Variable (depends on number of sub-engines)",
+        "accuracy": "Highest (multi-engine consensus)",
+        "memory": "Higher (loads multiple engines)"
+    },
+    "supported_languages": ["en", "ja", "ko", "zh", "de", "fr", "es", "ru", "ar", "it", "pt", "nl", "tr", "pl", "hi", "th", "vi", "id"]
+}

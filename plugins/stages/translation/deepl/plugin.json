@@ -1,0 +1,25 @@
+{
+  "name": "deepl",
+  "display_name": "DeepL Translator",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Premium translation using the DeepL API via the official Python SDK",
+  "type": "translation",
+  "enabled_by_default": false,
+  "settings": {
+    "api_key": {
+      "type": "string",
+      "default": "",
+      "description": "DeepL API key",
+      "sensitive": true
+    }
+  },
+  "dependencies": ["deepl"],
+  "api_key_required": true,
+  "runtime_requirements": {
+    "internet": {
+      "required": true,
+      "note": "Requires internet connection to access DeepL API"
+    }
+  }
+}

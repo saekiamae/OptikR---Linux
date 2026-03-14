@@ -1,0 +1,61 @@
+{
+  "name": "surya_ocr",
+  "display_name": "Surya OCR",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Vision-transformer OCR using Surya - GPU accelerated, 90+ languages, line-level bounding boxes",
+  "type": "ocr",
+  "engine_type": "surya_ocr",
+  "entry_point": "__init__.py",
+  "worker_script": "worker.py",
+  "enabled_by_default": false,
+  "essential": false,
+  "settings": {
+    "language": {
+      "type": "string",
+      "default": "en",
+      "description": "OCR language code (en, ja, ko, zh, etc.)",
+      "options": ["en", "ja", "ko", "zh", "de", "fr", "es", "ru", "ar", "it", "pt", "nl", "tr", "pl", "hi", "th", "vi", "id", "cs", "ro", "hu", "sv", "da", "fi", "el", "uk", "he", "bn", "ta", "te", "ml", "mr", "gu", "kn", "pa", "ur", "fa", "ms", "my", "km", "lo", "ka"]
+    },
+    "gpu": {
+      "type": "bool",
+      "default": true,
+      "description": "Use GPU acceleration if available"
+    },
+    "min_confidence": {
+      "type": "float",
+      "default": 0.5,
+      "description": "Minimum confidence threshold for text detection",
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "dependencies": [
+    "surya-ocr",
+    "opencv-python",
+    "numpy"
+  ],
+  "runtime_requirements": {
+    "gpu": {
+      "required": false,
+      "recommended": true,
+      "libraries": ["surya-ocr", "torch+cu121"]
+    },
+    "cpu": {
+      "supported": true,
+      "performance_note": "Significantly slower on CPU, GPU strongly recommended",
+      "libraries": ["surya-ocr", "torch-cpu"]
+    }
+  },
+  "exe_compatibility": {
+    "cpu_build": true,
+    "gpu_build": true,
+    "auto_disable_on_cpu": false
+  },
+  "supported_languages": [
+    "en", "ja", "ko", "zh", "de", "fr", "es", "ru", "ar", "it", "pt", "nl",
+    "tr", "pl", "hi", "th", "vi", "id", "cs", "ro", "hu", "sv", "da", "fi",
+    "el", "uk", "he", "bn", "ta", "te", "ml", "mr", "gu", "kn", "pa", "ur",
+    "fa", "ms", "my", "km", "lo", "ka"
+  ]
+}

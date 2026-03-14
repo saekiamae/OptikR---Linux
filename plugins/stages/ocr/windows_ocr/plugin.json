@@ -1,0 +1,57 @@
+{
+  "name": "windows_ocr",
+  "display_name": "Windows OCR",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Fast OCR using Windows.Media.Ocr via DirectML - GPU accelerated, ~10-30ms per frame",
+  "type": "ocr",
+  "engine_type": "windows_ocr",
+  "entry_point": "__init__.py",
+  "worker_script": "worker.py",
+  "enabled_by_default": false,
+  "essential": false,
+  "platform": "windows",
+  "settings": {
+    "language": {
+      "type": "string",
+      "default": "en",
+      "description": "OCR language code (en, ja, ko, zh, etc.)",
+      "options": ["en", "ja", "ko", "zh", "de", "fr", "es", "ru", "it", "pt", "ar"]
+    },
+    "min_confidence": {
+      "type": "float",
+      "default": 0.0,
+      "description": "Minimum confidence threshold for text detection (Windows OCR does not provide per-word confidence)",
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "dependencies": [
+    "winocr",
+    "opencv-python",
+    "numpy"
+  ],
+  "runtime_requirements": {
+    "gpu": {
+      "required": false,
+      "recommended": true,
+      "libraries": ["winocr"]
+    },
+    "cpu": {
+      "supported": true,
+      "performance_note": "Still fast on CPU (~10-30ms)",
+      "libraries": ["winocr"]
+    }
+  },
+  "exe_compatibility": {
+    "cpu_build": true,
+    "gpu_build": true,
+    "auto_disable_on_cpu": false
+  },
+  "supported_languages": [
+    "en", "ar", "bg", "cs", "da", "de", "el", "es", "fi", "fr",
+    "he", "hi", "hr", "hu", "id", "it", "ja", "ko", "nl", "no",
+    "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sv", "th", "tr",
+    "uk", "vi", "zh"
+  ]
+}

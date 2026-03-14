@@ -1,0 +1,25 @@
+{
+  "name": "google_api",
+  "display_name": "Google Cloud Translation",
+  "version": "pre-realese-1.0.0",
+  "author": "OptikR Team",
+  "description": "Premium translation using Google Cloud Translation API v2",
+  "type": "translation",
+  "enabled_by_default": false,
+  "settings": {
+    "api_key": {
+      "type": "string",
+      "default": "",
+      "description": "Google Cloud API key",
+      "sensitive": true
+    }
+  },
+  "dependencies": ["google-cloud-translate"],
+  "api_key_required": true,
+  "runtime_requirements": {
+    "internet": {
+      "required": true,
+      "note": "Requires internet connection to access Google Cloud Translation API"
+    }
+  }
+}
