@@ -1,0 +1,8 @@
+{
+  "uuid": "on-screen-translator@optikr",
+  "name": "On-Screen Translator",
+  "description": "Capture screen area and translate text via local OptikR backend",
+  "shell-version": ["45", "46", "47"],
+  "url": "https://example.local/optikr",
+  "version": 1
+}
