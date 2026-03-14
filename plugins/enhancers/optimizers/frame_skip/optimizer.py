@@ -148,15 +148,41 @@ class FrameSkipOptimizer:
         pixels = np.array(img).flatten()
         return hashlib.md5(pixels.tobytes()).hexdigest()
 
+    _THUMB_SIZE = (128, 128)
+    _BLOCK_SIZE = 16  # 8x8 grid of 16x16 blocks
+
     def _compute_mse(self, frame1: np.ndarray, frame2: np.ndarray) -> float:
-        """Compute MSE similarity between frames (0-1, higher = more similar)."""
-        img1 = Image.fromarray(frame1).resize((64, 64))
-        img2 = Image.fromarray(frame2).resize((64, 64))
+        """Compute MSE similarity between frames (0-1, higher = more similar).
+
+        Uses both global MSE and block-max MSE so that localised changes
+        (e.g. a single line of text changing) are detected even when the
+        global average difference is tiny.
+        """
+        sz = self._THUMB_SIZE
+        img1 = Image.fromarray(frame1).resize(sz)
+        img2 = Image.fromarray(frame2).resize(sz)
         arr1 = np.array(img1, dtype=np.float32)
         arr2 = np.array(img2, dtype=np.float32)
-        mse = np.mean((arr1 - arr2) ** 2)
+
+        diff_sq = (arr1 - arr2) ** 2
         max_mse = 255.0 ** 2
-        return 1.0 - (mse / max_mse)
+        global_sim = 1.0 - (float(np.mean(diff_sq)) / max_mse)
+
+        # Block-level check: find the single most-changed block.
+        # Collapse colour channels, then reshape into an 8×8 grid of blocks.
+        if diff_sq.ndim == 3:
+            block_diff = diff_sq.mean(axis=2)
+        else:
+            block_diff = diff_sq
+
+        bs = self._BLOCK_SIZE
+        h, w = block_diff.shape
+        bh, bw = h // bs, w // bs
+        trimmed = block_diff[:bh * bs, :bw * bs]
+        blocks = trimmed.reshape(bh, bs, bw, bs).mean(axis=(1, 3))
+        block_sim = 1.0 - (float(blocks.max()) / max_mse)
+
+        return min(global_sim, block_sim)
 
     def _compute_ssim(self, frame1: np.ndarray, frame2: np.ndarray) -> float:
         """Compute structural similarity between frames (0-1, higher = more similar).
@@ -164,7 +190,7 @@ class FrameSkipOptimizer:
         Uses a simplified SSIM that operates on downscaled grayscale thumbnails
         for speed (~2-3ms per call).  Constants follow Wang et al. 2004.
         """
-        size = (64, 64)
+        size = self._THUMB_SIZE
         img1 = np.array(Image.fromarray(frame1).resize(size).convert("L"), dtype=np.float64)
         img2 = np.array(Image.fromarray(frame2).resize(size).convert("L"), dtype=np.float64)
 
