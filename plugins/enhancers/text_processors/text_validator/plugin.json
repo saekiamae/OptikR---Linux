@@ -1,0 +1,24 @@
+{
+  "name": "text_validator",
+  "display_name": "Text Validator",
+  "version": "pre-realese-1.0.0",
+  "description": "Validates OCR text quality and filters garbage before translation. Checks readability, common word presence, grammar patterns, and capitalization.",
+  "author": "OptikR Team",
+  "category": "text_processor",
+  "enabled": false,
+  "priority": 5,
+  "settings": {
+    "min_confidence": {
+      "type": "float",
+      "default": 0.3,
+      "min": 0.1,
+      "max": 0.9,
+      "description": "Minimum confidence threshold for text validation"
+    },
+    "enable_smart_grammar": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable lightweight grammar checking (<5ms overhead)"
+    }
+  }
+}

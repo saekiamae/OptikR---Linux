@@ -1,0 +1,68 @@
+{
+  "name": "color_contrast",
+  "display_name": "Color Contrast Optimizer",
+  "version": "pre-realese-1.0.0",
+  "type": "optimizer",
+  "target_stage": "overlay",
+  "stage": "pre",
+  "description": "Detects background color behind text regions and adjusts overlay text/background colors for optimal readability. Uses WCAG 2.0 contrast ratios.",
+  "author": "OptikR Team",
+  "enabled": false,
+  "pipelines": [
+    "visual"
+  ],
+  "use_case": "readability",
+  "use_case_description": "Adapts overlay colors to match or contrast with the captured background for seamless or high-contrast display",
+  "settings": {
+    "mode": {
+      "type": "string",
+      "default": "auto_contrast",
+      "options": [
+        "auto_contrast",
+        "seamless"
+      ],
+      "description": "auto_contrast: Ensures text is readable against detected background. seamless: Matches overlay background to captured image background."
+    },
+    "min_contrast_ratio": {
+      "type": "float",
+      "default": 4.5,
+      "min": 3.0,
+      "max": 7.0,
+      "description": "Minimum WCAG contrast ratio between text and background (4.5 = AA, 7.0 = AAA)"
+    },
+    "sample_size": {
+      "type": "int",
+      "default": 20,
+      "min": 5,
+      "max": 50,
+      "description": "Pixel area to sample around each text region for background detection"
+    },
+    "fallback_text_light": {
+      "type": "string",
+      "default": "#ffffff",
+      "description": "Fallback text color on dark backgrounds (hex)"
+    },
+    "fallback_text_dark": {
+      "type": "string",
+      "default": "#000000",
+      "description": "Fallback text color on light backgrounds (hex)"
+    }
+  },
+  "dependencies": [],
+  "performance_impact": {
+    "cpu": 1,
+    "memory": 0,
+    "latency": 3,
+    "description": "Adds ~2-3ms per frame for background sampling and contrast calculation"
+  },
+  "recommended_for": [
+    "manga_reading",
+    "comic_reading",
+    "variable_backgrounds",
+    "seamless_overlay"
+  ],
+  "not_recommended_for": [
+    "static_solid_backgrounds",
+    "fixed_color_overlays"
+  ]
+}

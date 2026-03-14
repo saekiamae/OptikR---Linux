@@ -1,0 +1,51 @@
+{
+  "name": "intelligent_text_processor",
+  "display_name": "Intelligent Text Processor",
+  "version": "pre-realese-1.0.0",
+  "type": "optimizer",
+  "target_stage": "ocr",
+  "stage": "post",
+  "description": "Combines OCR error correction, text validation, and smart dictionary lookup. Fixes common errors like | → I, 0 → O, rn → m. Essential for parallel processing. Replaces text_validator plugin.",
+  "author": "OptikR Team",
+  "essential": true,
+  "replaces": [],
+  "enabled": true,
+  "pipelines": ["visual"],
+  "settings": {
+    "enable_corrections": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable OCR error correction (| → I, 0 → O, rn → m, etc.)"
+    },
+    "enable_context": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable context-aware corrections using surrounding text"
+    },
+    "enable_validation": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable text validation to filter out low-confidence OCR garbage"
+    },
+    "min_confidence": {
+      "type": "float",
+      "default": 0.3,
+      "min": 0.0,
+      "max": 1.0,
+      "description": "Minimum confidence threshold for text validation (0.0-1.0)"
+    },
+    "min_word_length": {
+      "type": "int",
+      "default": 2,
+      "min": 1,
+      "max": 10,
+      "description": "Minimum text length to keep (single valid letters like I, A are always allowed)"
+    },
+    "auto_learn": {
+      "type": "bool",
+      "default": true,
+      "description": "Automatically learn new corrections from validated text"
+    }
+  },
+  "dependencies": []
+}

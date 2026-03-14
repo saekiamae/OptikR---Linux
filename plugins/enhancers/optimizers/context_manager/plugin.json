@@ -1,0 +1,29 @@
+{
+    "name": "context_manager",
+    "display_name": "Context Manager",
+    "version": "2.0.0",
+    "type": "optimizer",
+    "target_stage": "translation",
+    "stage": "pre",
+    "description": "Domain-aware context profiles for consistent, high-quality translations. Provides locked term protection, translation memory overrides, regex-based rules, and formatting control as a pre/post processing layer around translation.",
+    "author": "OptikR Team",
+    "enabled": true,
+    "pipelines": ["visual", "audio"],
+    "settings": {
+        "active_profile": {
+            "type": "string",
+            "default": "",
+            "description": "Currently active context profile filename (without .json)"
+        },
+        "profiles_directory": {
+            "type": "string",
+            "default": "user_data/context_profiles",
+            "description": "Directory where context profile JSON files are stored"
+        },
+        "enabled": {
+            "type": "bool",
+            "default": true,
+            "description": "Whether context processing is active during translation"
+        }
+    }
+}

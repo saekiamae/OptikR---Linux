@@ -1,0 +1,60 @@
+{
+  "name": "frame_skip",
+  "display_name": "Frame Skip Optimizer",
+  "version": "2.0.0",
+  "type": "optimizer",
+  "target_stage": "ocr",
+  "stage": "pre",
+  "description": "Skips unchanged frames with adaptive backoff. Static mode for manga/wikipedia, dynamic mode for games/video with region-level change detection.",
+  "author": "OptikR Team",
+  "enabled": true,
+  "essential": true,
+  "pipelines": [
+    "visual"
+  ],
+  "settings": {
+    "similarity_threshold": {
+      "type": "float",
+      "default": 0.97,
+      "min": 0.8,
+      "max": 0.99,
+      "description": "Frame similarity threshold (0.8-0.99). Higher = stricter matching."
+    },
+    "max_skip_frames": {
+      "type": "int",
+      "default": 300,
+      "min": 10,
+      "max": 1000,
+      "description": "Maximum consecutive skipped frames before forcing a re-process"
+    },
+    "comparison_method": {
+      "type": "string",
+      "default": "mse",
+      "options": [
+        "hash",
+        "mse",
+        "ssim"
+      ],
+      "description": "Frame comparison method. MSE is recommended for robustness."
+    },
+    "adaptive_backoff": {
+      "type": "bool",
+      "default": true,
+      "description": "When enabled, capture rate slows down progressively on static content"
+    },
+    "content_mode": {
+      "type": "string",
+      "default": "static",
+      "options": [
+        "static",
+        "dynamic"
+      ],
+      "description": "static = manga/wikipedia (cheap, adaptive backoff). dynamic = games/video (uses frame differencing for partial OCR on changed regions)."
+    }
+  },
+  "performance": {
+    "static_mode": "80-95% CPU reduction, ~1-2ms per frame check",
+    "dynamic_mode": "50-70% CPU reduction, ~5-10ms per frame check but enables partial OCR",
+    "memory": "static: ~12KB (thumbnail). dynamic: +1-2MB (full previous frame)"
+  }
+}

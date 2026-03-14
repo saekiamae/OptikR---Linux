@@ -1,0 +1,147 @@
+{
+  "name": "audio_translation",
+  "version": "2.0.0",
+  "description": "Real-time bidirectional audio translation for video calls",
+  "stage": "standalone",
+  "enabled": false,
+  "settings": {
+    "enabled": {
+      "type": "bool",
+      "default": false,
+      "description": "Enable real-time audio translation"
+    },
+    "input_device": {
+      "type": "int",
+      "default": null,
+      "description": "Input device (microphone) index (null = default)"
+    },
+    "output_device": {
+      "type": "int",
+      "default": null,
+      "description": "Output device (speaker/headphones) index (null = default)"
+    },
+    "audio_source_mode": {
+      "type": "string",
+      "default": "microphone",
+      "options": ["microphone", "system", "youtube"],
+      "description": "Audio source: microphone (calls), system audio (desktop/loopback), or YouTube transcript (URL-based)"
+    },
+    "loopback_device": {
+      "type": "int",
+      "default": null,
+      "description": "WASAPI loopback device index for system audio capture (null = default output device)"
+    },
+    "youtube_url": {
+      "type": "string",
+      "default": "",
+      "description": "YouTube video URL to fetch timed transcript from (used in youtube mode)"
+    },
+    "auto_detect_language": {
+      "type": "bool",
+      "default": false,
+      "description": "Auto-detect source language via Whisper or YouTube transcript metadata instead of manual selection"
+    },
+    "source_language": {
+      "type": "string",
+      "default": "en",
+      "options": ["en", "ja", "de", "es", "fr", "zh", "ko", "ru", "it", "pt"],
+      "description": "Your language (what you speak)"
+    },
+    "target_language": {
+      "type": "string",
+      "default": "ja",
+      "options": ["ja", "en", "de", "es", "fr", "zh", "ko", "ru", "it", "pt"],
+      "description": "Target language (what you want to hear)"
+    },
+    "bidirectional": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable bidirectional translation (auto-detect and translate both ways)"
+    },
+    "whisper_model": {
+      "type": "string",
+      "default": "base",
+      "options": ["tiny", "base", "small", "medium", "large"],
+      "description": "Whisper model size (larger = more accurate but slower)"
+    },
+    "use_gpu": {
+      "type": "bool",
+      "default": true,
+      "description": "Use GPU acceleration for Whisper (3-5x faster)"
+    },
+    "vad_enabled": {
+      "type": "bool",
+      "default": true,
+      "description": "Enable Voice Activity Detection (reduces false transcriptions)"
+    },
+    "vad_sensitivity": {
+      "type": "int",
+      "default": 2,
+      "options": [0, 1, 2, 3],
+      "description": "VAD sensitivity (0=low, 3=high)"
+    },
+    "silence_threshold": {
+      "type": "float",
+      "default": 0.3,
+      "description": "Seconds of silence before processing speech (lower = faster, less accurate)"
+    },
+    "min_audio_length": {
+      "type": "float",
+      "default": 0.4,
+      "description": "Minimum audio duration in seconds to transcribe (filters noise)"
+    },
+    "voice_id": {
+      "type": "string",
+      "default": null,
+      "description": "Selected voice ID (null = auto-select best available). Supports system voices, Coqui models, custom clones, and voice packs."
+    },
+    "tts_speed": {
+      "type": "int",
+      "default": 170,
+      "description": "TTS speech rate (80-300, only applies to pyttsx3 system voices)"
+    },
+    "duck_enabled": {
+      "type": "bool",
+      "default": true,
+      "description": "Lower source audio volume while TTS is speaking (requires pycaw on Windows)"
+    },
+    "duck_level": {
+      "type": "int",
+      "default": 20,
+      "description": "Volume level (0-100%) to duck source audio to during TTS playback"
+    },
+    "parallel_processing": {
+      "type": "bool",
+      "default": false,
+      "description": "Run capture/STT/translation/TTS on separate threads with queues for overlapping execution (higher throughput, more resource usage)"
+    },
+    "show_subtitle_overlay": {
+      "type": "bool",
+      "default": false,
+      "description": "Display translated text as on-screen subtitles in a floating overlay"
+    },
+    "subtitle_font_size": {
+      "type": "int",
+      "default": 24,
+      "description": "Font size for the subtitle overlay (12-48)"
+    },
+    "bilingual_subtitles": {
+      "type": "bool",
+      "default": false,
+      "description": "Show original text above the translation in the subtitle overlay"
+    }
+  },
+  "requirements": [
+    "openai-whisper",
+    "pyaudio",
+    "pyttsx3",
+    "numpy",
+    "scipy"
+  ],
+  "optional_requirements": [
+    "webrtcvad",
+    "TTS",
+    "pycaw",
+    "youtube-transcript-api"
+  ]
+}
