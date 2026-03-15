@@ -225,10 +225,16 @@ class FrameSkipOptimizer:
             similar = (current_hash == self.previous_hash)
             self.previous_hash = current_hash
             return similar
-        elif self.method == 'mse':
-            return self._compute_mse(frame, self.previous_frame) >= effective
-        elif self.method == 'ssim':
-            return self._compute_ssim(frame, self.previous_frame) >= effective
+        elif self.method in ('mse', 'ssim'):
+            compute = self._compute_mse if self.method == 'mse' else self._compute_ssim
+            score = compute(frame, self.previous_frame)
+            similar = score >= effective
+            if not similar:
+                self.logger.info(
+                    "[FRAME SKIP] Change detected (%s=%.4f, threshold=%.4f)",
+                    self.method, score, effective,
+                )
+            return similar
         return False
 
     # ------------------------------------------------------------------
