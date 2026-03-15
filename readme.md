@@ -61,6 +61,10 @@ OptikR is not just a screen translator — it's a **modular framework built on e
 - New optimizer plugins (frame skip, caching, preprocessing)
 - New text processors (spell check, regex filters)
 
+### DEMO Video
+
+https://www.youtube.com/watch?v=7JkA0uPoAnE
+
 **Plugin Generator Helps You:**
 
 ```bash
