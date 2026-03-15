@@ -156,6 +156,10 @@ class PluginCaptureLayer(ICaptureLayer):
         stats['performance_profile'] = self._performance_profile.value
         return stats
 
+    def force_refresh(self, monitor_id: int = 0) -> None:
+        """Force-recreate the capture backend to avoid stale DXGI frames."""
+        self.plugin_manager.force_refresh(monitor_id)
+
     def cleanup(self) -> None:
         try:
             self.plugin_manager.cleanup()
