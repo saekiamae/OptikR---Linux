@@ -215,9 +215,13 @@ class PipelineFactory:
         small_text_enhance = False
         small_text_denoise = False
         small_text_binarize = False
+        stability_threshold = 0.80
         if self.config_manager is not None:
             confidence_threshold = self.config_manager.get_setting(
                 'ocr.confidence_threshold', 0.5,
+            )
+            stability_threshold = self.config_manager.get_setting(
+                'ocr.stability_threshold', 0.80,
             )
             preprocessing_enabled = self.config_manager.get_setting(
                 'ocr.preprocessing_enabled', False,
@@ -267,6 +271,7 @@ class PipelineFactory:
                 ocr_layer,
                 confidence_threshold=confidence_threshold,
                 source_lang=config.source_language,
+                stability_threshold=stability_threshold,
             ),
             TranslationStage(
                 translation_layer,

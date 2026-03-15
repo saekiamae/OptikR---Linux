@@ -187,6 +187,14 @@ class TranslationCacheOptimizer:
             'evictions': self.evictions,
         }
 
+    def reset(self) -> None:
+        """Clear in-memory cache on pipeline restart.
+
+        Disk-persisted translations are unaffected — they are loaded
+        separately by the startup pipeline.
+        """
+        self.clear()
+
     def clear(self) -> None:
         self.cache.clear()
         self.timestamps.clear()

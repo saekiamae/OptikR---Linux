@@ -8,9 +8,12 @@ Delegates actual frame capture to the active backend.
 import logging
 import importlib.util
 import json
+import os
 from pathlib import Path
 
 import numpy as np
+
+_DEBUG_DIR = Path(__file__).resolve().parent.parent.parent / "test_frames"
 
 from app.workflow.base.plugin_interface import PluginMetadata
 from app.workflow.plugins.manager import UnifiedPluginManager
@@ -36,6 +39,7 @@ class CapturePluginManager:
         self._bettercam_camera = None
         self._bettercam_streaming = False
         self._bettercam_region: tuple[int, ...] | None = None
+        self._debug_frame_counter = 0
 
     # ------------------------------------------------------------------
     # Plugin directories
@@ -176,6 +180,21 @@ class CapturePluginManager:
 
         return None
 
+    def _save_debug_frame(self, frame: np.ndarray) -> None:
+        self._debug_frame_counter += 1
+        if self._debug_frame_counter > 3:
+            return
+        try:
+            import time as _t
+            _DEBUG_DIR.mkdir(parents=True, exist_ok=True)
+            from PIL import Image
+            tag = _t.strftime("%H%M%S")
+            path = _DEBUG_DIR / f"cap_{tag}_frame{self._debug_frame_counter}.png"
+            Image.fromarray(frame[..., ::-1]).save(str(path))
+            print(f"[DEBUG] Saved frame -> {path}", flush=True)
+        except Exception as e:
+            print(f"[DEBUG] Could not save frame: {e}", flush=True)
+
     def _start_bettercam_stream(self, monitor_id: int, region: tuple[int, ...]) -> None:
         """Start (or restart) BetterCam in continuous-capture mode."""
         import time
@@ -221,15 +240,41 @@ class CapturePluginManager:
         self._bettercam_region = None
 
     def force_refresh(self, monitor_id: int = 0) -> None:
-        """Stop the BetterCam stream so the next capture starts a fresh one.
+        """Destroy and recreate the BetterCam camera for a fresh DXGI session.
 
-        Does NOT release the camera -- BetterCam uses a global singleton
-        registry, so ``release()`` + ``create()`` returns the same stale
-        instance.  Stopping and restarting the stream is sufficient to
-        get fresh DXGI frames.
+        BetterCam's DXGI ``Duplicator`` handle is created once in the camera's
+        ``__init__`` and never recreated by ``.stop()/.start()``.  The only way
+        to obtain a truly fresh DXGI session is to:
+
+        1. ``release()`` the camera (frees DXGI resources).
+        2. Drop all strong references (``self._bettercam_camera = None``).
+        3. Force garbage-collection so the ``WeakValueDictionary`` entry in
+           ``DXFactory._camera_instances`` expires.
+
+        The next ``bettercam.create()`` call then returns a brand-new camera
+        with a freshly acquired DXGI output duplication handle.
         """
+        import gc
+
         self.logger.info("Force-refreshing BetterCam capture (monitor=%d)", monitor_id)
         self._stop_bettercam_stream()
+
+        if self._bettercam_camera is not None:
+            try:
+                self._bettercam_camera.release()
+            except Exception:
+                pass
+            self._bettercam_camera = None
+
+        gc.collect()
+
+        try:
+            import bettercam
+            bettercam.DXFactory._camera_instances.clear()
+        except Exception:
+            pass
+
+        self._debug_frame_counter = 0
 
     @staticmethod
     def _capture_pil(region_data: dict) -> np.ndarray | None:

@@ -1098,6 +1098,9 @@ class PipelineManagementTab(TranslatableMixin, QWidget):
                 self.config_manager.set_setting(
                     'pipeline.enable_optimizer_plugins',
                     pl.plugins_enabled_check.isChecked())
+                self.config_manager.set_setting(
+                    'ocr.stability_threshold',
+                    pl.ocr_stability_threshold_spin.value())
                 self.save_config()
 
             QMessageBox.information(
@@ -1308,6 +1311,10 @@ class PipelineManagementTab(TranslatableMixin, QWidget):
                 cfg.get('enabled', False))
             pl.parallel_capture_workers_spin.setValue(
                 cfg.get('worker_threads', 4))
+
+        # OCR stage: stability threshold (from config, not plugin.json)
+        pl.ocr_stability_threshold_spin.setValue(
+            self.config_manager.get_setting('ocr.stability_threshold', 0.80))
 
         # OCR stage: Intelligent Text Processor (non-standard 'config' key)
         cfg = self._read_plugin_json(
@@ -1638,6 +1645,11 @@ class PipelineManagementTab(TranslatableMixin, QWidget):
             'pipeline.enable_optimizer_plugins',
             pl.plugins_enabled_check.isChecked())
 
+        # OCR stability threshold
+        self.config_manager.set_setting(
+            'ocr.stability_threshold',
+            pl.ocr_stability_threshold_spin.value())
+
         # Parallel Capture
         self.config_manager.set_setting(
             'pipeline.parallel_capture.enabled',
@@ -1946,6 +1958,7 @@ class PipelineManagementTab(TranslatableMixin, QWidget):
         state['skip_max_frames'] = pl.skip_max_frames_spin.value()
         state['skip_adaptive'] = pl.skip_adaptive_check.isChecked()
         state['skip_content_mode'] = pl.skip_content_mode_combo.currentIndex()
+        state['ocr_stability_threshold'] = pl.ocr_stability_threshold_spin.value()
 
         state['motion_threshold'] = pl.motion_threshold_spin.value()
         state['motion_smoothing'] = pl.motion_smoothing_spin.value()

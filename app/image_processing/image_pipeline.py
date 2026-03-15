@@ -287,6 +287,7 @@ class ImagePipeline:
     ) -> list[Any]:
         """Construct and optionally plugin-wrap the stage list."""
         confidence = self._get_setting("ocr.confidence_threshold", 0.5)
+        stability_threshold = self._get_setting("ocr.stability_threshold", 0.80)
         preprocessing_on = self._get_setting("ocr.preprocessing_enabled", False)
         preprocessing_intelligent = self._get_setting(
             "ocr.preprocessing_intelligent", True,
@@ -302,6 +303,7 @@ class ImagePipeline:
                 self._ocr_layer,
                 confidence_threshold=confidence,
                 source_lang=source_lang,
+                stability_threshold=stability_threshold,
             ),
             TranslationStage(
                 self._translation_layer,

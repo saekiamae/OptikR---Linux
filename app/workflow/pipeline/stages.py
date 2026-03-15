@@ -179,8 +179,7 @@ class OCRStage:
     name = "ocr"
 
     _MAX_ROI_AREA_RATIO = 0.40
-    _STABILITY_THRESHOLD = 0.88
-    _HIGH_SIMILARITY_THRESHOLD = 0.92
+    _STABILITY_THRESHOLD_DEFAULT = 0.80
     _MIN_ROI_WIDTH = 50
     _MIN_ROI_HEIGHT = 40
     _MIN_ROI_AREA = 3000
@@ -196,13 +195,25 @@ class OCRStage:
         ocr_layer: Any = None,
         confidence_threshold: float = 0.5,
         source_lang: str = "",
+        stability_threshold: float | None = None,
     ) -> None:
         self._ocr_layer = ocr_layer
         self._confidence_threshold = confidence_threshold
         self._source_lang = source_lang
+        thresh = (stability_threshold if stability_threshold is not None
+                  else self._STABILITY_THRESHOLD_DEFAULT)
+        self._STABILITY_THRESHOLD = max(0.50, min(0.99, thresh))
+        self._HIGH_SIMILARITY_THRESHOLD = min(
+            0.99, self._STABILITY_THRESHOLD + 0.04)
         self._prev_thumb: np.ndarray | None = None
         self._prev_results: list[Any] | None = None
         self._prev_roi_fingerprint: int = 0
+
+    def reset(self) -> None:
+        """Clear the frame-stability cache so the next frame is OCR'd fresh."""
+        self._prev_thumb = None
+        self._prev_results = None
+        self._prev_roi_fingerprint = 0
 
     # ------------------------------------------------------------------
     # Frame stability helpers
@@ -417,12 +428,14 @@ class OCRStage:
                 roi_regions = frame.metadata.get("roi_regions", [])
 
             # --- Stability cache: reuse previous results for similar frames ---
-            # Two-tier check: very high similarity (>0.92) trusts the frame
-            # content alone — overlay-induced ROI fingerprint changes are
-            # ignored because the underlying manga page hasn't changed.
-            # Moderate similarity (0.88–0.92) still requires a matching ROI
-            # fingerprint to avoid false cache hits when scrolling between
-            # pages with similar brightness distributions.
+            # Two-tier check: very high similarity (threshold+4%) trusts
+            # the frame content alone — overlay-induced ROI fingerprint
+            # changes are ignored because the underlying page hasn't
+            # changed.  Moderate similarity (threshold..threshold+4%)
+            # still requires a matching ROI fingerprint to avoid false
+            # cache hits when scrolling between pages with similar
+            # brightness distributions.  Both thresholds are configurable
+            # via Settings > Plugins > OCR Stage > Stability Threshold.
             roi_fingerprint = self._roi_fingerprint(roi_regions)
             similarity = self._frame_similarity(frame.data)
             frame_is_stable = similarity >= self._STABILITY_THRESHOLD

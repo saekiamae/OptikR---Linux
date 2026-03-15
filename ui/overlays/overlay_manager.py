@@ -322,14 +322,18 @@ class TranslationOverlay(QWidget):
             return self.position
     
     def _exclude_from_capture(self):
-        """Make this window invisible to screen capture (Windows 10 2004+).
+        """Control whether screen capture APIs can see this overlay.
 
-        Uses SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE so DXGI
-        Desktop Duplication (used by bettercam) never sees the overlay,
+        When ``config.exclude_from_capture`` is True (default), uses
+        ``SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)`` so DXGI
+        Desktop Duplication (BetterCam) never sees the overlay,
         preventing the OCR-reads-its-own-overlay feedback loop.
 
-        Always applied regardless of user settings — the pipeline must never
-        capture its own overlays.
+        When False (user enabled "overlay visible in screenshots"), the
+        affinity is reset to ``WDA_NONE`` so the overlay appears in
+        screenshots and screen recordings.  Note: this may cause the
+        pipeline to OCR its own overlays if they overlap the capture
+        region.
         """
         import sys
         if sys.platform != 'win32':
@@ -338,13 +342,16 @@ class TranslationOverlay(QWidget):
             import ctypes
             hwnd = int(self.winId())
 
+            if not self.config.exclude_from_capture:
+                WDA_NONE = 0x00000000
+                ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_NONE)
+                return
+
             WDA_EXCLUDEFROMCAPTURE = 0x00000011
             ok = ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)
             if ok:
                 return
 
-            # WDA_EXCLUDEFROMCAPTURE failed — fall back to WDA_MONITOR which
-            # shows a black rectangle instead of the window content in captures.
             WDA_MONITOR = 0x00000001
             ok = ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_MONITOR)
             if ok:

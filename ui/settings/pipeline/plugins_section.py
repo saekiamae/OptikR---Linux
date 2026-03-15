@@ -379,6 +379,33 @@ class PluginsByStageSection(TranslatableMixin, QWidget):
         engine_display_layout.addStretch()
         layout.addLayout(engine_display_layout)
 
+        # OCR Stability Cache threshold
+        stability_group = QGroupBox()
+        self.set_translatable_text(
+            stability_group, "plugins_ocr_stability_cache_section")
+        stability_layout = QFormLayout(stability_group)
+
+        stability_desc = QLabel()
+        self.set_translatable_text(
+            stability_desc, "plugins_ocr_stability_desc")
+        stability_desc.setWordWrap(True)
+        stability_desc.setStyleSheet("color: #666666; font-size: 8pt;")
+        stability_layout.addRow("", stability_desc)
+
+        self.ocr_stability_threshold_spin = CustomDoubleSpinBox()
+        self.ocr_stability_threshold_spin.setRange(0.50, 0.99)
+        self.ocr_stability_threshold_spin.setSingleStep(0.01)
+        self.ocr_stability_threshold_spin.setDecimals(2)
+        self.ocr_stability_threshold_spin.setValue(0.80)
+        self.set_translatable_text(
+            self.ocr_stability_threshold_spin,
+            "plugins_ocr_stability_tooltip", method="setToolTip")
+        stability_layout.addRow(
+            tr("plugins_ocr_stability_threshold_label"),
+            self.ocr_stability_threshold_spin)
+
+        layout.addWidget(stability_group)
+
         # Intelligent Text Processor Plugin (ESSENTIAL)
         intelligent_group = QGroupBox()
         self.set_translatable_text(

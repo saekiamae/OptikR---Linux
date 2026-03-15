@@ -219,12 +219,39 @@ class BasePipeline(ResourceOwner):
         logger.info("BasePipeline stopped")
 
     def _reset_plugins(self) -> None:
-        """Reset all stage plugins so stale state doesn't carry across runs."""
+        """Reset all stage plugins and inner-stage caches so stale state
+        doesn't carry across runs."""
         from .plugin_stage import PluginAwareStage
 
         for stage in self._stages:
             if not isinstance(stage, PluginAwareStage):
+                if hasattr(stage, "reset"):
+                    try:
+                        stage.reset()
+                    except Exception as exc:
+                        logger.debug("Stage %s reset failed: %s",
+                                     type(stage).__name__, exc)
                 continue
+
+            # Reset the inner stage (e.g. OCRStage stability cache)
+            inner = stage.inner_stage
+            if hasattr(inner, "reset"):
+                try:
+                    inner.reset()
+                except Exception as exc:
+                    logger.debug("Inner stage %s reset failed: %s",
+                                 type(inner).__name__, exc)
+
+            # Clear OCR layer cache if the inner stage owns one
+            ocr_layer = getattr(inner, "_ocr_layer", None)
+            if ocr_layer is not None:
+                ocr_cache = getattr(ocr_layer, "_cache", None)
+                if ocr_cache is not None and hasattr(ocr_cache, "clear"):
+                    try:
+                        ocr_cache.clear()
+                    except Exception as exc:
+                        logger.debug("OCR cache clear failed: %s", exc)
+
             for plugin in stage.pre_plugins + stage.post_plugins:
                 if hasattr(plugin, "reset"):
                     try:

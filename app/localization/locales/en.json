@@ -2799,6 +2799,11 @@
     "plugins_parallel_regions_desc": "Process multiple screen regions simultaneously using worker threads for faster multi-region capture.",
     "plugins_worker_threads_label": "Worker Threads:",
 
+    "plugins_ocr_stability_cache_section": "🔄 OCR Stability Cache",
+    "plugins_ocr_stability_desc": "Reuses previous OCR results when the captured frame looks similar. Lower values make the pipeline more responsive to text changes on screen; higher values reduce redundant OCR calls. Set to ~0.80 for dynamic content, ~0.90 for static manga pages.",
+    "plugins_ocr_stability_threshold_label": "Stability Threshold:",
+    "plugins_ocr_stability_tooltip": "Frames with similarity above this threshold reuse cached OCR results instead of re-running OCR. Lower = more sensitive to text changes, Higher = fewer OCR calls.",
+
     "pipeline_management_intelligent_text_processor_essential_section": "🔤 Intelligent Text Processor ⭐ ESSENTIAL",
     "plugins_intelligent_text_desc": "Comprehensive text processing: OCR error correction, context-aware validation, and noise filtering. Reduces garbage text by 30-50%.",
     "pipeline_management_enable_ocr_corrections_check": "Enable OCR Corrections",
