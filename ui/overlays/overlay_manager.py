@@ -196,6 +196,10 @@ class TranslationOverlay(QWidget):
         
         # Position window
         self._position_window()
+        
+        # Exclude from screen capture before first show to prevent
+        # BetterCam from ever seeing the overlay (feedback loop).
+        self._exclude_from_capture()
     
     def _setup_window(self):
         """Configure window properties."""
@@ -317,30 +321,47 @@ class TranslationOverlay(QWidget):
         else:
             return self.position
     
-    def _apply_capture_affinity(self):
-        """Apply screen-capture visibility affinity on Windows.
+    def _exclude_from_capture(self):
+        """Make this window invisible to screen capture (Windows 10 2004+).
 
-        - exclude_from_capture=True  -> hide overlay from desktop capture APIs
-        - exclude_from_capture=False -> allow overlay in screenshots/capture
+        Uses SetWindowDisplayAffinity with WDA_EXCLUDEFROMCAPTURE so DXGI
+        Desktop Duplication (used by bettercam) never sees the overlay,
+        preventing the OCR-reads-its-own-overlay feedback loop.
+
+        Always applied regardless of user settings — the pipeline must never
+        capture its own overlays.
         """
         import sys
         if sys.platform != 'win32':
             return
         try:
             import ctypes
-            WDA_EXCLUDEFROMCAPTURE = 0x00000011
-            WDA_NONE = 0x00000000
             hwnd = int(self.winId())
-            affinity = (
-                WDA_EXCLUDEFROMCAPTURE
-                if self.config.exclude_from_capture
-                else WDA_NONE
+
+            WDA_EXCLUDEFROMCAPTURE = 0x00000011
+            ok = ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE)
+            if ok:
+                return
+
+            # WDA_EXCLUDEFROMCAPTURE failed — fall back to WDA_MONITOR which
+            # shows a black rectangle instead of the window content in captures.
+            WDA_MONITOR = 0x00000001
+            ok = ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, WDA_MONITOR)
+            if ok:
+                logger.warning(
+                    "WDA_EXCLUDEFROMCAPTURE unsupported; using WDA_MONITOR fallback "
+                    "(overlays will appear as black rectangles in captures)"
+                )
+                return
+
+            err = ctypes.windll.kernel32.GetLastError()
+            logger.warning(
+                "SetWindowDisplayAffinity failed (hwnd=%s, err=%d). "
+                "Overlays may be captured by BetterCam causing a feedback loop.",
+                hwnd, err,
             )
-            ok = ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, affinity)
-            if not ok:
-                logger.debug("SetWindowDisplayAffinity returned 0 (may need Win10 2004+)")
         except Exception:
-            logger.debug("SetWindowDisplayAffinity unavailable", exc_info=True)
+            logger.warning("SetWindowDisplayAffinity unavailable", exc_info=True)
 
     def show_animated(self):
         """Show overlay with animation."""
@@ -349,12 +370,13 @@ class TranslationOverlay(QWidget):
         # This ensures overlay is visible even if animation fails
         self.setWindowOpacity(self.config.style.opacity)
         
+        # Exclude from screen capture BEFORE showing so BetterCam never
+        # sees the overlay, even for a single frame.
+        self._exclude_from_capture()
+        
         # Show window
         self.show()
         self.raise_()  # Bring to front
-
-        # Apply configured capture visibility behavior for this overlay window
-        self._apply_capture_affinity()
         self.setWindowState(self.windowState() & ~Qt.WindowState.WindowMinimized | Qt.WindowState.WindowActive)
         
         # REMOVED: repaint() causes recursive repaint and freezes UI
