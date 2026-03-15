@@ -112,7 +112,12 @@ class TextBlockMerger:
         return data
 
     def _merge_text_blocks(self, texts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Merge nearby text blocks intelligently."""
+        """Merge nearby text blocks intelligently.
+
+        Two blocks merge when they are spatially adjacent:
+        - Same line (vertical overlap) AND small horizontal gap, OR
+        - Stacked lines (small vertical gap) AND horizontal overlap.
+        """
         if not texts:
             return texts
 
@@ -133,29 +138,15 @@ class TextBlockMerger:
             prev = current_group[-1]
             curr = sorted_texts[i]
 
-            prev_bbox = prev['bbox']
-            curr_bbox = curr['bbox']
+            should_merge = self._should_merge_pair(prev['bbox'], curr['bbox'])
 
-            prev_bottom = prev_bbox[1] + prev_bbox[3]
-            curr_top = curr_bbox[1]
-            vertical_gap = abs(curr_top - prev_bottom)
-
-            prev_right = prev_bbox[0] + prev_bbox[2]
-            curr_left = curr_bbox[0]
-            horizontal_gap = abs(curr_left - prev_right)
-
-            should_merge = (horizontal_gap <= self.horizontal_threshold or
-                            vertical_gap <= self.vertical_threshold)
-
-            if should_merge and not self.respect_punctuation:
-                current_group.append(curr)
-            elif should_merge and self.respect_punctuation:
+            if should_merge and self.respect_punctuation:
                 prev_text = current_group[-1]['text'].strip()
-                if prev_text and prev_text[-1] not in '.!?。！？':
-                    current_group.append(curr)
-                else:
-                    merged.append(self._combine_group(current_group))
-                    current_group = [curr]
+                if prev_text and prev_text[-1] in '.!?。！？':
+                    should_merge = False
+
+            if should_merge:
+                current_group.append(curr)
             else:
                 merged.append(self._combine_group(current_group))
                 current_group = [curr]
@@ -164,6 +155,33 @@ class TextBlockMerger:
             merged.append(self._combine_group(current_group))
 
         return merged
+
+    def _should_merge_pair(self, a: List, b: List) -> bool:
+        """Decide whether two bounding boxes should be merged.
+
+        Conditions (must satisfy at least one):
+        1. Vertically overlapping (same line) AND horizontal gap is small.
+        2. Vertically close (adjacent lines) AND boxes overlap horizontally.
+        """
+        a_left, a_top, a_w, a_h = a
+        b_left, b_top, b_w, b_h = b
+        a_right = a_left + a_w
+        a_bottom = a_top + a_h
+        b_right = b_left + b_w
+        b_bottom = b_top + b_h
+
+        vert_overlap = a_top < b_bottom and b_top < a_bottom
+        vert_gap = max(0, b_top - a_bottom, a_top - b_bottom)
+
+        horiz_overlap = a_left < b_right and b_left < a_right
+        horiz_gap = max(0, b_left - a_right, a_left - b_right)
+
+        if vert_overlap and horiz_gap <= self.horizontal_threshold:
+            return True
+        if vert_gap <= self.vertical_threshold and horiz_overlap:
+            return True
+
+        return False
 
     def _group_into_lines(self, texts: List[Dict[str, Any]]) -> List[List[Dict[str, Any]]]:
         """Group text blocks into horizontal lines."""
