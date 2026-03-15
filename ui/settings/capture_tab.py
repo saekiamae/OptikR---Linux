@@ -88,13 +88,12 @@ class CaptureSettingsTab(TranslatableMixin, QWidget):
         # Check if running in CPU mode
         runtime_mode = self.config_manager.get_runtime_mode() if self.config_manager else 'auto'
         
-        # Check DirectX availability using hardware capability gate
+        # Check BetterCam availability using hardware capability gate
         directx_gated = False
         try:
             gate = get_hardware_gate(self.config_manager)
-            directx_gated = not gate.is_available(GatedFeature.DIRECTX_CAPTURE)
+            directx_gated = not gate.is_available(GatedFeature.BETTERCAM_CAPTURE)
         except Exception:
-            # If gate unavailable, fall back to runtime mode check
             directx_gated = (runtime_mode == 'cpu')
         
         # Check DirectX / BetterCam availability (single probe — both use bettercam)
@@ -906,10 +905,10 @@ class CaptureSettingsTab(TranslatableMixin, QWidget):
             elif self.method_auto_radio:
                 self.method_auto_radio.setChecked(True)
             
-            # Apply hardware gating to DirectX radio button
+            # Apply hardware gating to BetterCam/DirectX radio button
             try:
                 gate = get_hardware_gate(self.config_manager)
-                directx_available = gate.is_available(GatedFeature.DIRECTX_CAPTURE)
+                directx_available = gate.is_available(GatedFeature.BETTERCAM_CAPTURE)
                 if self.method_directx_radio:
                     self.method_directx_radio.setEnabled(directx_available)
                     if not directx_available:
