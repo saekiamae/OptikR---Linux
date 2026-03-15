@@ -1055,7 +1055,13 @@ class StartupPipeline(QObject):
 
         if not self._validate_capture_region():
             return False
-        
+
+        if self.capture_layer and hasattr(self.capture_layer, 'force_refresh'):
+            monitor_id = 0
+            if self.capture_region:
+                monitor_id = getattr(self.capture_region, 'monitor_id', 0)
+            self.capture_layer.force_refresh(monitor_id)
+
         self.logger.info(f"Starting pipeline with region: {self.capture_region}")
 
         self._compile_context_manager()
@@ -1082,6 +1088,12 @@ class StartupPipeline(QObject):
 
         if self.pipeline:
             self.pipeline.stop()
+
+        if self.capture_layer and hasattr(self.capture_layer, 'force_refresh'):
+            monitor_id = 0
+            if self.capture_region:
+                monitor_id = getattr(self.capture_region, 'monitor_id', 0)
+            self.capture_layer.force_refresh(monitor_id)
 
         # Hide all overlays immediately so nothing lingers on screen
         if self.overlay_system:
