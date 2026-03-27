@@ -388,7 +388,7 @@ OptikR/
 - **CPU**: Dual-core 2.0 GHz
 - **RAM**: 4 GB
 - **Storage**: 2 GB free
-- **Python**: 3.10+
+- **Python**: 3.10, 3.11 or 3.12
 
 ### Recommended
 - **OS**: Windows 10/11
@@ -396,7 +396,7 @@ OptikR/
 - **RAM**: 8 GB
 - **GPU**: NVIDIA GPU with CUDA support
 - **Storage**: 5 GB free (for AI models)
-- **Python**: 3.10 or 3.11
+- **Python**: 3.10, 3.11 or 3.11
 
 ---
 
@@ -419,6 +419,12 @@ Full documentation is in the `docs/` folder:
 - [Plugins and Engines](docs/PLUGINS_AND_ENGINES.md) — Plugin system, creation guide, engine reference
 - [Project Structure and Config](docs/PROJECT_STRUCTURE_AND_CONFIG.md) — Folder layout, config API
 - [Benchmark Pipeline](docs/benchmarking.md) — Benchmark system overview
+
+---
+
+## Contributor
+
+**saekiamae** - **https://github.com/saekiamae**
 
 ---
 
