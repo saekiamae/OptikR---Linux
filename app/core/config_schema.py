@@ -134,7 +134,6 @@ class ConfigSchema:
             name='capture.method',
             type=str,
             default='auto',
-            choices=['auto', 'directx', 'bettercam', 'screenshot', 'plugin'],
             description='Screen capture method to use'
         ))
         
